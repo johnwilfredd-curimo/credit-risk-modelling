@@ -1,0 +1,156 @@
+{
+  "info": {
+    "_postman_id": "659481f0-4248-4259-b8d8-a095647addc9",
+    "name": "Credit Risk Modelling API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "58511183",
+    "_collection_link": "https://go.postman.co/collection/58511183-659481f0-4248-4259-b8d8-a095647addc9?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "Health - check",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));\r\npm.test(\"Responds in under 2s\", () => pm.expect(pm.response.responseTime).to.be.below(2000));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/ping",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "ping"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Predict - valid applicant",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));\r\n\r\nconst body = pm.response.json();\r\n\r\npm.test(\"Response has exactly the three contract fields\", () => {\r\n  pm.expect(body).to.have.all.keys(\"probability\", \"credit_score\", \"rating\");\r\n});\r\n\r\npm.test(\"Probability is a valid probability\", () => {\r\n  pm.expect(body.probability).to.be.a(\"number\").and.to.be.within(0, 1);\r\n});\r\n\r\npm.test(\"Credit score sits in the 300-900 band\", () => {\r\n  pm.expect(body.credit_score).to.be.within(300, 900);\r\n});\r\n\r\npm.test(\"Rating is consistent with the score band\", () => {\r\n  const bands = [\r\n    [300, 500, \"Poor\"],\r\n    [500, 650, \"Average\"],\r\n    [650, 750, \"Good\"],\r\n    [750, 901, \"Excellent\"],\r\n  ];\r\n  const expected = bands.find(([lo, hi]) => body.credit_score >= lo && body.credit_score < hi)[2];\r\n  pm.expect(body.rating).to.eql(expected);\r\n});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"age\": 28,\r\n  \"income\": 1200000,\r\n  \"loan_amount\": 2560000,\r\n  \"loan_tenure_months\": 36,\r\n  \"avg_dpd_per_delinquency\": 20,\r\n  \"delinquency_ratio\": 30,\r\n  \"credit_utilization_ratio\": 30,\r\n  \"num_open_accounts\": 2,\r\n  \"residence_type\": \"Owned\",\r\n  \"loan_purpose\": \"Education\",\r\n  \"loan_type\": \"Unsecured\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{base_url}}/predict_credit_risk",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "predict_credit_risk"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Predict - invalid residence type",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Unknown category is rejected, not silently scored\", () =>\r\n  pm.response.to.have.status(422));\r\n\r\npm.test(\"Error names the offending field\", () => {\r\n  const detail = JSON.stringify(pm.response.json().detail);\r\n  pm.expect(detail).to.include(\"residence_type\");\r\n});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"age\": 28,\r\n  \"income\": 1200000,\r\n  \"loan_amount\": 2560000,\r\n  \"loan_tenure_months\": 36,\r\n  \"avg_dpd_per_delinquency\": 20,\r\n  \"delinquency_ratio\": 30,\r\n  \"credit_utilization_ratio\": 30,\r\n  \"num_open_accounts\": 2,\r\n  \"residence_type\": \"Mansion\",\r\n  \"loan_purpose\": \"Education\",\r\n  \"loan_type\": \"Unsecured\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{base_url}}/predict_credit_risk",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "predict_credit_risk"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Predict - missing required field",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Missing field is rejected\", () => pm.response.to.have.status(422));\r\npm.test(\"Error names the missing field\", () => {\r\n  pm.expect(JSON.stringify(pm.response.json().detail)).to.include(\"age\");\r\n});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"income\": 1200000,\r\n  \"loan_amount\": 2560000,\r\n  \"loan_tenure_months\": 36,\r\n  \"avg_dpd_per_delinquency\": 20,\r\n  \"delinquency_ratio\": 30,\r\n  \"credit_utilization_ratio\": 30,\r\n  \"num_open_accounts\": 2,\r\n  \"residence_type\": \"Owned\",\r\n  \"loan_purpose\": \"Education\",\r\n  \"loan_type\": \"Unsecured\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{base_url}}/predict_credit_risk",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "predict_credit_risk"
+          ]
+        }
+      },
+      "response": []
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://127.0.0.1:8000"
+    }
+  ]
+}
