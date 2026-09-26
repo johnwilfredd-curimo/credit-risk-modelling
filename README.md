@@ -1,20 +1,10 @@
----
-title: Credit Risk Modelling API
-emoji: 📊
-colorFrom: indigo
-colorTo: blue
-sdk: docker
-app_port: 7860
-pinned: false
----
-
 # Credit Risk Modelling
 
 Predicts the probability that a loan applicant defaults, and converts it into a CIBIL-style **300–900
 credit score** with a rating band a loan officer can act on.
 
-**[Live demo](https://<your-subdomain>.streamlit.app)** ·
-**[API docs](https://<your-hf-username>-credit-risk-api.hf.space/docs)** ·
+**[Live demo](https://credit-risk-modelling-jwc.streamlit.app/)** ·
+**[API docs](https://credit-api.srv1818955.hstgr.cloud/docs)** ·
 **[Notebook](https://nbviewer.org/github/johnwilfredd-curimo/credit-risk-modelling/blob/main/notebooks/credit_risk_modelling.ipynb)**
 
 ---
@@ -92,7 +82,7 @@ credit-risk-modelling/
 ├─ streamlit_app.py          Streamlit entrypoint
 ├─ src/prediction.py         shared prediction module
 ├─ api/main.py               FastAPI service
-├─ postman/                  collection + environment
+├─ postman/                  Postman collection + run screenshot
 ├─ artifacts/                model + scaler + feature schema (one .joblib)
 ├─ dataset/                  customers, loans, bureau data, + appendix B files
 ├─ notebooks/                the full end-to-end notebook
