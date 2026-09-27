@@ -1,0 +1,36 @@
+# Deployment descriptor for both portfolio ML APIs on the Hostinger VPS.
+#
+# Expects both repos cloned as siblings:
+#   /docker/ml-apis/
+#   ├─ docker-compose.yml   (this file, copied here)
+#   ├─ credit-risk-modelling/
+#   └─ health-insurance-premium-prediction/
+#
+# Routing is handled by the existing Traefik container (Docker label provider,
+# letsencrypt HTTP-01 resolver). No ports are published: Traefik runs on host
+# networking and reaches these containers directly over the bridge network.
+
+services:
+  credit-risk-api:
+    build: ./credit-risk-modelling
+    container_name: credit-risk-api
+    restart: unless-stopped
+    mem_limit: 512m
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.credit-api.entrypoints=websecure"
+      - "traefik.http.routers.credit-api.rule=Host(`credit-api.srv1818955.hstgr.cloud`)"
+      - "traefik.http.routers.credit-api.tls.certresolver=letsencrypt"
+      - "traefik.http.services.credit-api.loadbalancer.server.port=7860"
+
+  insurance-api:
+    build: ./health-insurance-premium-prediction
+    container_name: insurance-api
+    restart: unless-stopped
+    mem_limit: 512m
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.insurance-api.entrypoints=websecure"
+      - "traefik.http.routers.insurance-api.rule=Host(`insurance-api.srv1818955.hstgr.cloud`)"
+      - "traefik.http.routers.insurance-api.tls.certresolver=letsencrypt"
+      - "traefik.http.services.insurance-api.loadbalancer.server.port=7860"
