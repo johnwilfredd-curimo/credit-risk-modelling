@@ -1,5 +1,7 @@
 # Credit Risk Modelling
 
+[![API tests](https://github.com/johnwilfredd-curimo/credit-risk-modelling/actions/workflows/api-tests.yml/badge.svg)](https://github.com/johnwilfredd-curimo/credit-risk-modelling/actions/workflows/api-tests.yml)
+
 Predicts the probability that a loan applicant defaults, and converts it into a CIBIL-style **300–900
 credit score** with a rating band a loan officer can act on.
 
