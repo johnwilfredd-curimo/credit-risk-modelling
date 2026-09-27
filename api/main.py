@@ -3,7 +3,14 @@ from pydantic import BaseModel
 from typing import Literal
 from src.prediction import predict
 
-app = FastAPI()
+app = FastAPI(
+    title="Credit Risk Modelling API",
+    description=(
+        "Predicts loan default probability and converts it into a "
+        "CIBIL-style 300-900 credit score with a rating band."
+    ),
+    version="1.0.0",
+)
 
 class CreditRiskInput(BaseModel):
     age: int
